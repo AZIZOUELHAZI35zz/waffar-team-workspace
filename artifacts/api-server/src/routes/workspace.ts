@@ -51,7 +51,7 @@ const seed = async (): Promise<void> => {
 
   await db.insert(timeSessionsTable).values([
     { taskId: seededTasks[0].id, userId: aziz.id, startedAt: new Date(Date.now() - 2 * 60 * 60 * 1000), endedAt: new Date(Date.now() - 30 * 60 * 1000), durationSeconds: 5400 },
-    { taskId: seededTasks[1].id, userId: cto.id, startedAt: new Date(Date.now() - 3 * 60 * 60 * 1000), endedAt: new Date(Date.now() - 45 * 60 * 60 * 1000), durationSeconds: 8100 },
+    { taskId: seededTasks[1].id, userId: cto.id, startedAt: new Date(Date.now() - 3 * 60 * 60 * 1000), endedAt: new Date(Date.now() - 45 * 60 * 1000), durationSeconds: 8100 },
     { taskId: seededTasks[2].id, userId: cmo.id, startedAt: new Date(Date.now() - 90 * 60 * 1000), endedAt: new Date(Date.now() - 20 * 60 * 1000), durationSeconds: 4200 },
   ]);
 
