@@ -14,6 +14,7 @@ import {
   LayoutDashboard,
   ListTodo,
   Menu,
+  MessageCircle,
   MoreHorizontal,
   Pause,
   Play,
@@ -23,6 +24,7 @@ import {
   Sparkles,
   Timer,
   Users,
+  Video,
   X,
 } from "lucide-react";
 import type { Activity, Profile, Task } from "@workspace/api-client-react";
@@ -54,6 +56,10 @@ export function formatDate(dateValue?: string | null) {
   return new Intl.DateTimeFormat("en", { month: "short", day: "numeric" }).format(new Date(dateValue));
 }
 
+export function formatLongDate(dateValue = new Date()) {
+  return new Intl.DateTimeFormat("en", { weekday: "long", month: "long", day: "numeric" }).format(dateValue);
+}
+
 export function Avatar({ profile, size = "md", className = "" }: { profile?: Partial<Profile> | null; size?: "sm" | "md" | "lg"; className?: string }) {
   const sizeClass = size === "lg" ? "h-11 w-11 text-sm" : size === "sm" ? "h-7 w-7 text-[10px]" : "h-8 w-8 text-[11px]";
   const name = profile?.fullName ?? "Team member";
@@ -80,7 +86,7 @@ export function PageHeader({ eyebrow, title, description, action }: { eyebrow?: 
 }
 
 const nav = [
-  { href: "/", label: "Workspace", icon: LayoutDashboard },
+  { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/my-tasks", label: "My tasks", icon: ListTodo },
   { href: "/tasks", label: "All tasks", icon: CircleDot },
   { href: "/team", label: "Team", icon: Users },
@@ -88,7 +94,13 @@ const nav = [
   { href: "/activity", label: "Activity", icon: ActivityIcon },
 ];
 
-export function AppShell({ children, currentUser, onCreateTask, onLogout }: { children: React.ReactNode; currentUser?: Profile | null; onCreateTask?: () => void; onLogout?: () => void }) {
+const navCollaborate = [
+  { href: "/chat", label: "Chat", icon: MessageCircle },
+  { href: "/meetings", label: "Meetings", icon: Video },
+  { href: "/workspace", label: "Workspace", icon: Settings },
+];
+
+export function AppShell({ children, currentUser, myTaskCount = 0, onCreateTask, onLogout }: { children: React.ReactNode; currentUser?: Profile | null; myTaskCount?: number; onCreateTask?: () => void; onLogout?: () => void }) {
   const [location] = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [commandOpen, setCommandOpen] = useState(false);
@@ -117,7 +129,21 @@ export function AppShell({ children, currentUser, onCreateTask, onLogout }: { ch
               <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)} className={`group flex items-center gap-3 rounded-[10px] px-3 py-2.5 text-sm font-medium transition-colors ${active ? "bg-[#2d6540] text-[#fff8e8] shadow-[inset_3px_0_0_#e8a020]" : "text-[#c2ddc8] hover:bg-[#285a39] hover:text-white"}`} data-testid={`link-nav-${item.label.toLowerCase().replaceAll(" ", "-")}`}>
                 <Icon size={17} strokeWidth={active ? 2.2 : 1.8} />
                 <span>{item.label}</span>
-                {item.label === "My tasks" && <span className="ml-auto rounded-full bg-[#e8a020] px-1.5 py-0.5 text-[10px] font-bold text-[#173d24]">4</span>}
+                {item.label === "My tasks" && myTaskCount > 0 && <span className="ml-auto rounded-full bg-[#e8a020] px-1.5 py-0.5 text-[10px] font-bold text-[#173d24]">{myTaskCount}</span>}
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="mt-6 px-3 text-[10px] font-bold uppercase tracking-[0.2em] text-[#91ba9c]">Collaborate</div>
+        <nav className="mt-3 space-y-1" aria-label="Collaborate navigation">
+          {navCollaborate.map((item) => {
+            const active = location.startsWith(item.href);
+            const Icon = item.icon;
+            return (
+              <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)} className={`group flex items-center gap-3 rounded-[10px] px-3 py-2.5 text-sm font-medium transition-colors ${active ? "bg-[#2d6540] text-[#fff8e8] shadow-[inset_3px_0_0_#e8a020]" : "text-[#c2ddc8] hover:bg-[#285a39] hover:text-white"}`} data-testid={`link-nav-${item.label.toLowerCase()}`}>
+                <Icon size={17} strokeWidth={active ? 2.2 : 1.8} />
+                <span>{item.label}</span>
               </Link>
             );
           })}
@@ -148,7 +174,7 @@ export function AppShell({ children, currentUser, onCreateTask, onLogout }: { ch
       <main className="min-h-[100dvh] lg:pl-[258px]">
         <div className="sticky top-0 z-20 flex h-[68px] items-center justify-between border-b border-[#e8e1d5] bg-[#faf7f2]/90 px-5 backdrop-blur-md sm:px-8 lg:px-10">
           <button type="button" onClick={() => setMobileOpen(true)} className="rounded-lg p-2 text-[#1b4d2e] hover:bg-[#e9f2e8] lg:hidden" data-testid="button-open-menu"><Menu size={21} /></button>
-          <div className="hidden items-center gap-2 text-xs text-[#829087] lg:flex"><span className="h-1.5 w-1.5 rounded-full bg-[#4d995f]" /> Thursday, 24 October <span className="text-[#c6bfae]">/</span> <span className="font-semibold text-[#49614f]">Good morning, {user.fullName?.split(" ")[0] || "team"}</span></div>
+          <div className="hidden items-center gap-2 text-xs text-[#829087] lg:flex"><span className="h-1.5 w-1.5 rounded-full bg-[#4d995f]" /> {formatLongDate()} <span className="text-[#c6bfae]">/</span> <span className="font-semibold text-[#49614f]">Good morning, {user.fullName?.split(" ")[0] || "team"}</span></div>
           <div className="ml-auto flex items-center gap-2 sm:gap-3">
             <button type="button" onClick={() => setCommandOpen(true)} className="hidden h-9 items-center gap-2 rounded-lg border border-[#ded7ca] bg-[#fffdf9] px-3 text-xs text-[#8b968d] shadow-sm transition hover:border-[#b7cdb9] sm:flex" data-testid="button-header-search"><Search size={14} /><span>Search anything</span><kbd className="ml-3 rounded border border-[#e2dbcf] px-1.5 py-0.5 font-mono text-[9px]">⌘K</kbd></button>
             <button type="button" className="relative rounded-lg p-2 text-[#627167] hover:bg-[#e9f2e8]" data-testid="button-notifications"><Bell size={18} /><span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-[#e8a020]" /></button>
@@ -294,7 +320,7 @@ export function FilterBar({ query, onQuery, status, onStatus, placeholder = "Fil
 
 export function TeamStrip({ team }: { team: Profile[] }) {
   const working = useMemo(() => team.filter((person) => person.status === "working"), [team]);
-  return <div className="flex items-center"><div className="flex -space-x-2">{team.slice(0, 6).map((person) => <Avatar key={person.id} profile={person} size="sm" className="transition-transform hover:z-10 hover:-translate-y-1" />)}</div><span className="ml-3 text-xs text-[#7d8a80]"><span className="font-semibold text-[#395540]">{working.length} online</span> · {team.length} people</span></div>;
+  return <div className="flex items-center"><div className="flex -space-x-2">{team.slice(0, 6).map((person) => <Avatar key={person.id} profile={person} size="sm" className="transition-transform hover:z-10 hover:-translate-y-1" />)}</div><span className="ml-3 text-xs text-[#7d8a80]"><span className="font-semibold text-[#395540]">{working.length} working now</span> · {team.length} {team.length === 1 ? "person" : "people"}</span></div>;
 }
 
 export function Toggle({ value, onChange, label, id }: { value: boolean; onChange: (value: boolean) => void; label: string; id?: string }) {
