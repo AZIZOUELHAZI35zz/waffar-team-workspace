@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "WAFFAR Team Workspace"
+description = "A private internal workspace for WAFFAR teams to coordinate tasks, track working time, and stay aligned on current team activity."
+version = "1.0.0"
+id = "artifacts/waffar-workspace"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21851
+
+[services.development]
+run = "pnpm --filter @workspace/waffar-workspace run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/waffar-workspace", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/waffar-workspace/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21851"
+BASE_PATH = "/"

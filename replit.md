@@ -1,6 +1,6 @@
-# [Project name]
+# WAFFAR Team Workspace
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+Private internal workspace for WAFFAR to coordinate tasks, track team time, and make current work visible.
 
 ## Run & Operate
 
@@ -22,15 +22,24 @@ _Replace the heading above with the project's name, and this line with one sente
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/waffar-workspace` — React + Vite application
+- `artifacts/api-server/src/routes/workspace.ts` — workspace API handlers and development seed
+- `lib/api-spec/openapi.yaml` — API contract source of truth
+- `lib/db/src/schema/waffar.ts` — Drizzle schema for development PostgreSQL
+- `supabase/schema.sql` — Supabase-compatible schema and RLS reference
+- `artifacts/waffar-workspace/src/components/workspace.tsx` — reusable workspace UI primitives
+- `artifacts/waffar-workspace/src/pages/workspace-pages.tsx` — routed workspace pages
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- The web app uses the shared API server and PostgreSQL for a runnable Replit MVP; `supabase/schema.sql` keeps the external Supabase migration path explicit.
+- The dashboard reads a single workspace snapshot for fast initial rendering while tasks, comments, activity, and timer mutations use dedicated endpoints and invalidate the relevant React Query caches.
+- Time is stored as sessions with a persisted start and end; active sessions are recovered from the database and never rely only on a browser interval.
+- The seed runs once on the first workspace request, making the app immediately useful in development without hiding empty-state behavior from real data.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+WAFFAR team members can see current work, create and assign tasks, move tasks through TODO / IN PROGRESS / BLOCKED / DONE, start and stop persistent timers, comment on tasks, and review team activity and workload.
 
 ## User preferences
 
@@ -38,7 +47,9 @@ _Populate as you build — explicit user instructions worth remembering across s
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- After changing `lib/api-spec/openapi.yaml`, run API codegen before typechecking the app.
+- The API seed is intended for development. Clear the development database before using real team data.
+- `DATABASE_URL` is required by the shared Drizzle client.
 
 ## Pointers
 

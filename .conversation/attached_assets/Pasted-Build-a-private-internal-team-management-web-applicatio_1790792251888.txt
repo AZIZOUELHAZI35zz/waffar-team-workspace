@@ -1,0 +1,806 @@
+Build a private internal team management web application for my startup **WAFFAR**.
+
+## 1. Goal
+
+Create a simple, clean, modern internal workspace for a small startup team.
+
+The application is NOT a public product and NOT a mobile application.
+
+It is an internal web dashboard where team members can:
+
+- See their own tasks
+- See tasks assigned to other team members
+- Create and assign tasks
+- Update task status
+- Track how much time they spend working
+- See how much time other team members spent
+- See the activity/progress of the team
+- Know what each person is currently working on
+
+The main objective is **team coordination and transparency**, not project-management complexity.
+
+Keep the MVP simple.
+
+---
+
+# 2. Tech Stack
+
+Use:
+
+- Replit
+- React + TypeScript
+- Vite
+- Tailwind CSS
+- Supabase
+- Supabase PostgreSQL
+- Supabase Auth
+- Lucide React icons
+
+Do NOT use:
+
+- Firebase
+- MongoDB
+- Prisma
+- Next.js unless absolutely necessary
+- Any external project-management SaaS
+- Any paid API
+
+The application must be deployable directly from Replit.
+
+---
+
+# 3. Authentication
+
+Use Supabase Authentication.
+
+Users must log in before accessing the application.
+
+For the MVP, support:
+
+- Email/password login
+- Logout
+- Persistent session
+
+After login, retrieve the user's profile from Supabase.
+
+Each user has:
+
+- id
+- full_name
+- email
+- avatar_url
+- role
+- department
+- created_at
+
+---
+
+# 4. Team Structure
+
+The startup is WAFFAR.
+
+Create these departments:
+
+- CEO
+- CTO
+- CMO
+- CFO
+- Operations
+- Product
+- Marketing
+- Sales
+- Other
+
+Example team members:
+
+CEO
+CTO
+CMO
+
+The system must be flexible so I can add more members later.
+
+Each user belongs to one department and has a role.
+
+---
+
+# 5. Main Dashboard
+
+After login, display a dashboard.
+
+The dashboard should contain:
+
+### Header
+
+- WAFFAR logo/name
+- Current user's name
+- Department
+- Profile menu
+- Logout button
+
+### Main statistics
+
+Display cards:
+
+- My Tasks
+- In Progress
+- Completed
+- Time Worked Today
+- Time Worked This Week
+
+### My Current Tasks
+
+Show tasks assigned to the current user.
+
+Each task displays:
+
+- Title
+- Description
+- Priority
+- Status
+- Assigned person
+- Due date
+- Time spent
+- Timer state
+
+### Team Activity
+
+Show recent team activity:
+
+Example:
+
+"Ahmed completed Landing Page"
+
+"Yassine started Backend API"
+
+"Aziz created a new task for CTO"
+
+"CTO worked 2h 15m today"
+
+Keep this simple.
+
+---
+
+# 6. Tasks
+
+Create a Tasks page.
+
+Display tasks in a clean Kanban board:
+
+### TODO
+
+### IN PROGRESS
+
+### BLOCKED
+
+### DONE
+
+Each task should be represented by a card.
+
+Task card:
+
+- Title
+- Short description
+- Assigned member
+- Department
+- Priority
+- Due date
+- Time spent
+- Status
+
+Priority:
+
+- Low
+- Medium
+- High
+- Urgent
+
+Allow users to create tasks.
+
+Task creation form:
+
+- Title
+- Description
+- Assigned user
+- Department
+- Priority
+- Due date
+
+The creator should automatically be stored.
+
+---
+
+# 7. Task Details
+
+Clicking a task opens a task detail view.
+
+Display:
+
+- Task title
+- Description
+- Creator
+- Assigned member
+- Department
+- Priority
+- Status
+- Created date
+- Due date
+- Total time worked
+- Activity history
+
+Allow authorized users to:
+
+- Change status
+- Change assignee
+- Edit task
+- Start timer
+- Stop timer
+- Add comment
+
+---
+
+# 8. Time Tracking
+
+This is one of the most important features.
+
+Every task should have a timer.
+
+Example:
+
+00:32:15
+
+When the user clicks:
+
+START TIMER
+
+start recording work time.
+
+When they click:
+
+STOP TIMER
+
+save the session in Supabase.
+
+Do NOT rely only on the browser timer.
+
+Store actual sessions in the database.
+
+Create a table:
+
+time_sessions
+
+Fields:
+
+- id
+- task_id
+- user_id
+- started_at
+- ended_at
+- duration_seconds
+- created_at
+
+The application should calculate total time from saved sessions.
+
+If the browser is refreshed while a timer is running, the application must recover the active timer from Supabase.
+
+A user should not be able to have two active timers simultaneously.
+
+---
+
+# 9. Team Time Tracking
+
+Create a "Team" page.
+
+Display every team member.
+
+For each member show:
+
+- Name
+- Department
+- Current task
+- Tasks completed
+- Tasks in progress
+- Time worked today
+- Time worked this week
+
+Example:
+
+Aziz
+CEO
+Currently working on: WAFFAR Landing Page
+Today: 3h 42m
+This week: 14h 25m
+
+CTO
+Currently working on: Supabase Security
+Today: 2h 15m
+This week: 11h 40m
+
+CMO
+Currently working on: Instagram Strategy
+Today: 1h 50m
+This week: 8h 20m
+
+Do not hardcode these values.
+
+Everything must come from Supabase.
+
+---
+
+# 10. My Tasks Page
+
+Create a dedicated page:
+
+"My Tasks"
+
+Filters:
+
+- All
+- Todo
+- In Progress
+- Blocked
+- Done
+
+Additional filters:
+
+- Priority
+- Due date
+
+Show:
+
+- Task
+- Status
+- Priority
+- Due date
+- Time spent
+
+---
+
+# 11. Team Page
+
+Create a team overview.
+
+Display team members as cards.
+
+Each card:
+
+Avatar
+
+Name
+
+Department
+
+Role
+
+Current task
+
+Current status:
+
+🟢 Working
+⚪ Offline
+
+Statistics:
+
+Tasks completed
+Tasks in progress
+Hours worked
+
+Clicking a member opens their profile/activity page.
+
+---
+
+# 12. Activity Feed
+
+Create an activity system.
+
+Record events such as:
+
+- Task created
+- Task assigned
+- Task status changed
+- Timer started
+- Timer stopped
+- Task completed
+- Comment added
+
+Create:
+
+activity_logs
+
+Fields:
+
+- id
+- user_id
+- task_id
+- action
+- metadata
+- created_at
+
+Display recent activity in chronological order.
+
+---
+
+# 13. Comments
+
+Each task should have comments.
+
+Create:
+
+task_comments
+
+Fields:
+
+- id
+- task_id
+- user_id
+- content
+- created_at
+
+Users can add comments.
+
+Display:
+
+Avatar
+Name
+Comment
+Time
+
+---
+
+# 14. Supabase Database
+
+Create the required SQL schema.
+
+Tables should include at minimum:
+
+profiles
+tasks
+time_sessions
+task_comments
+activity_logs
+
+Use UUID primary keys.
+
+Use foreign keys.
+
+Use timestamps.
+
+Use appropriate indexes.
+
+Use Row Level Security.
+
+---
+
+# 15. Security
+
+Enable Supabase RLS.
+
+Authenticated users can:
+
+- Read team members
+- Read tasks
+- Read activity
+- Read time tracking
+- Create tasks
+- Update tasks
+- Add comments
+- Start/stop their own timers
+
+Users should not be able to modify another user's time session.
+
+The CEO should have elevated permissions for administration.
+
+Do NOT expose Supabase service-role keys in frontend code.
+
+Use only public Supabase environment variables in the client.
+
+---
+
+# 16. CEO Permissions
+
+The CEO should be able to:
+
+- Create tasks
+- Assign tasks
+- Reassign tasks
+- Edit tasks
+- Delete tasks
+- View all team statistics
+- View all time tracking
+- Manage team members
+
+Regular members can:
+
+- View tasks
+- Update their assigned tasks
+- Track their own time
+- Comment
+- See team progress
+
+---
+
+# 17. UI / UX
+
+Design should look like a modern startup internal workspace.
+
+Style:
+
+- Minimal
+- Professional
+- Clean
+- Fast
+- Desktop-first
+- Responsive
+
+WAFFAR brand:
+
+Primary green:
+#1B4D2E
+
+Secondary:
+#E8A020
+
+Background:
+#FAF7F2
+
+Light green:
+#D8EDDF
+
+Dark:
+#0F1410
+
+Use rounded cards.
+
+Use subtle shadows.
+
+Use clean typography.
+
+Do not make the UI overly complicated.
+
+The application should feel closer to a modern SaaS dashboard than an enterprise ERP.
+
+---
+
+# 18. Sidebar
+
+Create a sidebar with:
+
+WAFFAR
+
+Dashboard
+My Tasks
+Tasks
+Team
+Time Tracking
+Activity
+
+CEO/Admin:
+
+Settings
+Team Management
+
+At the bottom:
+
+User avatar
+Name
+Department
+Logout
+
+---
+
+# 19. Dashboard Layout
+
+Desktop:
+
+Sidebar on the left.
+
+Main content:
+
+Top:
+Welcome message.
+
+Example:
+
+"Good evening, Aziz 👋"
+
+"Here's what's happening with your team."
+
+Then statistics cards.
+
+Then:
+
+Left:
+My Current Tasks
+
+Right:
+Team Activity
+
+Bottom:
+
+Team Workload
+
+Show a simple visualization of:
+
+Member → Tasks → Hours
+
+Use a lightweight chart library only if necessary.
+
+---
+
+# 20. Responsive Design
+
+The application must work on:
+
+Desktop
+Laptop
+Tablet
+Mobile browser
+
+This is a web application, but mobile browser support should still work.
+
+Do NOT build a separate mobile app.
+
+---
+
+# 21. Real-Time Updates
+
+Use Supabase Realtime where useful.
+
+When:
+
+- A task changes
+- Someone starts a timer
+- Someone stops a timer
+- A task is completed
+
+Other users should see the update without refreshing the page.
+
+---
+
+# 22. Empty States
+
+Create good empty states.
+
+Example:
+
+"No tasks yet."
+
+"Create your first task to start working with your team."
+
+For no activity:
+
+"No team activity yet."
+
+---
+
+# 23. Seed Data
+
+Create development seed data.
+
+Team:
+
+Aziz — CEO
+CTO — CTO
+CMO — CMO
+
+Create example tasks:
+
+"Build WAFFAR Landing Page"
+"Implement Supabase Authentication"
+"Create Marketing Strategy"
+"Contact First 10 Merchants"
+"Prepare Investor Presentation"
+
+Create realistic statuses and time sessions.
+
+Make it easy to remove seed data later.
+
+---
+
+# 24. Important Architecture
+
+Organize the project cleanly.
+
+Suggested structure:
+
+src/
+  components/
+  pages/
+  layouts/
+  hooks/
+  lib/
+  services/
+  types/
+  utils/
+
+Create reusable components:
+
+TaskCard
+TaskBoard
+Timer
+StatCard
+TeamMemberCard
+ActivityFeed
+CommentSection
+Sidebar
+Header
+Modal
+
+Do not put everything inside App.tsx.
+
+---
+
+# 25. Environment Variables
+
+Use:
+
+VITE_SUPABASE_URL
+
+VITE_SUPABASE_ANON_KEY
+
+Create a clear `.env.example`.
+
+Never commit real credentials.
+
+---
+
+# 26. Important MVP Rule
+
+Do NOT over-engineer this.
+
+The purpose of this project is:
+
+"One small internal workspace where our startup team knows what everyone is doing and how much time we spend."
+
+Avoid:
+
+- Complex project management
+- Billing
+- Notifications
+- AI
+- Chat
+- Calendar integrations
+- Email integrations
+- Public registration
+- Mobile application
+- Complicated permissions
+
+Those can come later.
+
+Focus on:
+
+1. Authentication
+2. Team members
+3. Tasks
+4. Task assignment
+5. Kanban
+6. Timer
+7. Time tracking
+8. Team overview
+9. Activity feed
+10. Supabase persistence
+
+---
+
+# 27. Deliverables
+
+Build the application completely.
+
+Before finishing:
+
+1. Create the Supabase SQL schema.
+2. Configure authentication.
+3. Configure RLS.
+4. Implement all pages.
+5. Implement task CRUD.
+6. Implement timer persistence.
+7. Implement activity logs.
+8. Implement comments.
+9. Implement team statistics.
+10. Add seed data.
+11. Test all main flows.
+12. Fix TypeScript errors.
+13. Fix console errors.
+14. Make the UI responsive.
+15. Provide setup instructions in README.md.
+
+The final result should be a functional WAFFAR internal team workspace that can be used immediately by a small team.

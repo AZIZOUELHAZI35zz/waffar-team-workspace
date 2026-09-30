@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: workspace
+    description: WAFFAR workspace operations
 paths:
   /healthz:
     get:
@@ -24,6 +26,188 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /workspace:
+    get:
+      operationId: getWorkspace
+      tags: [workspace]
+      summary: Get the current workspace snapshot
+      responses:
+        "200":
+          description: Workspace snapshot
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Workspace"
+  /tasks:
+    get:
+      operationId: listTasks
+      tags: [workspace]
+      summary: List workspace tasks
+      parameters:
+        - name: assigneeId
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: status
+          in: query
+          schema:
+            type: ["string", "null"]
+      responses:
+        "200":
+          description: Task list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Task"
+    post:
+      operationId: createTask
+      tags: [workspace]
+      summary: Create a task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskInput"
+      responses:
+        "201":
+          description: Created task
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+  /tasks/{taskId}:
+    patch:
+      operationId: updateTask
+      tags: [workspace]
+      summary: Update a task
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskUpdate"
+      responses:
+        "200":
+          description: Updated task
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+    delete:
+      operationId: deleteTask
+      tags: [workspace]
+      summary: Delete a task
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Task deleted
+  /tasks/{taskId}/comments:
+    get:
+      operationId: listTaskComments
+      tags: [workspace]
+      summary: List task comments
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Task comments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Comment"
+    post:
+      operationId: createTaskComment
+      tags: [workspace]
+      summary: Add a task comment
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommentInput"
+      responses:
+        "201":
+          description: Created comment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Comment"
+  /tasks/{taskId}/timer:
+    post:
+      operationId: startTaskTimer
+      tags: [workspace]
+      summary: Start or resume a task timer
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "201":
+          description: Active time session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TimeSession"
+  /tasks/{taskId}/timer/stop:
+    post:
+      operationId: stopTaskTimer
+      tags: [workspace]
+      summary: Stop a task timer
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Completed time session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TimeSession"
+  /activity:
+    get:
+      operationId: listActivity
+      tags: [workspace]
+      summary: List recent activity
+      responses:
+        "200":
+          description: Recent activity
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Activity"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +217,114 @@ components:
           type: string
       required:
         - status
+    Profile:
+      type: object
+      required: [id, fullName, email, role, department, avatarInitials]
+      properties:
+        id: { type: string }
+        fullName: { type: string }
+        email: { type: string }
+        avatarUrl: { type: ["string", "null"] }
+        avatarInitials: { type: string }
+        role: { type: string }
+        department: { type: string }
+        status: { type: string, enum: [working, online, offline] }
+        currentTaskId: { type: ["string", "null"] }
+        tasksCompleted: { type: integer }
+        tasksInProgress: { type: integer }
+        timeTodaySeconds: { type: integer }
+        timeWeekSeconds: { type: integer }
+    Task:
+      type: object
+      required: [id, title, description, status, priority, assignee, creator, department, dueDate, timeSpentSeconds, createdAt]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        description: { type: string }
+        status: { type: string, enum: [todo, in_progress, blocked, done] }
+        priority: { type: string, enum: [low, medium, high, urgent] }
+        assignee: { $ref: "#/components/schemas/Profile" }
+        creator: { $ref: "#/components/schemas/Profile" }
+        department: { type: string }
+        dueDate: { type: ["string", "null"] }
+        timeSpentSeconds: { type: integer }
+        activeSession: { type: ["object", "null"], properties: { startedAt: { type: string }, userId: { type: string } }, required: [startedAt, userId] }
+        createdAt: { type: string }
+    TaskInput:
+      type: object
+      required: [title, description, assigneeId, department, priority, dueDate]
+      properties:
+        title: { type: string, minLength: 1 }
+        description: { type: string }
+        assigneeId: { type: string }
+        department: { type: string }
+        priority: { type: string, enum: [low, medium, high, urgent] }
+        dueDate: { type: ["string", "null"] }
+    TaskUpdate:
+      type: object
+      properties:
+        title: { type: string }
+        description: { type: string }
+        assigneeId: { type: string }
+        department: { type: string }
+        priority: { type: string, enum: [low, medium, high, urgent] }
+        dueDate: { type: ["string", "null"] }
+        status: { type: string, enum: [todo, in_progress, blocked, done] }
+    TimeSession:
+      type: object
+      required: [id, taskId, userId, startedAt, endedAt, durationSeconds]
+      properties:
+        id: { type: string }
+        taskId: { type: string }
+        userId: { type: string }
+        startedAt: { type: string }
+        endedAt: { type: ["string", "null"] }
+        durationSeconds: { type: integer }
+    Comment:
+      type: object
+      required: [id, taskId, author, content, createdAt]
+      properties:
+        id: { type: string }
+        taskId: { type: string }
+        author: { $ref: "#/components/schemas/Profile" }
+        content: { type: string }
+        createdAt: { type: string }
+    CommentInput:
+      type: object
+      required: [content]
+      properties:
+        content: { type: string, minLength: 1 }
+    Activity:
+      type: object
+      required: [id, action, actor, message, createdAt]
+      properties:
+        id: { type: string }
+        action: { type: string }
+        actor: { $ref: "#/components/schemas/Profile" }
+        taskId: { type: ["string", "null"] }
+        message: { type: string }
+        createdAt: { type: string }
+    Workspace:
+      type: object
+      required: [currentUser, team, tasks, activity, stats]
+      properties:
+        currentUser: { $ref: "#/components/schemas/Profile" }
+        team:
+          type: array
+          items: { $ref: "#/components/schemas/Profile" }
+        tasks:
+          type: array
+          items: { $ref: "#/components/schemas/Task" }
+        activity:
+          type: array
+          items: { $ref: "#/components/schemas/Activity" }
+        stats:
+          type: object
+          required: [myTasks, inProgress, completed, timeTodaySeconds, timeWeekSeconds]
+          properties:
+            myTasks: { type: integer }
+            inProgress: { type: integer }
+            completed: { type: integer }
+            timeTodaySeconds: { type: integer }
+            timeWeekSeconds: { type: integer }
 
